@@ -1,0 +1,117 @@
+class CustomRover:
+
+    dimensions = [10, 10, 10]
+
+    def __init__(self, swarm_identifier, rover_identifier, initial_location):
+        self.swarm_identifier = swarm_identifier
+        self.rover_identifier = rover_identifier
+        self.current_location = initial_location
+
+    def display_location(self):
+        print("Rover's location: ", self.current_location)
+        print('Swarm Identifier: ', self.swarm_identifier)
+        print('Rover Identifier: ', self.rover_identifier)
+
+    def move_rover(self, displacement):
+        self.current_location = [coord + disp for coord, disp in zip(self.current_location, displacement)]
+        print("Rover's location: ", self.current_location)
+
+    def verify_and_move(self, provided_swarm_id, provided_rover_id, displacement):
+        if provided_swarm_id == self.swarm_identifier and provided_rover_id == self.rover_identifier:
+            self.move_rover(displacement)
+        else:
+            print('Incorrect rover identification')
+            
+            
+
+class CustomDaughterRover(CustomRover):
+
+    def __init__(self, swarm_identifier, rover_identifier, initial_location):
+        super().__init__(swarm_identifier, rover_identifier, initial_location)
+
+    rover_dimensions = [x / 2 for x in CustomRover.dimensions]
+
+    def move_daughter_rover(self, displacement):
+        return super().move_rover([coord / 2 for coord in displacement])
+
+class CustomManager(CustomUser):
+
+    rover_ids_collection = [[]]
+
+    def __init__(self, user_identifier):
+        super().__init__(user_identifier)
+
+    def add_rover(self, custom_rover):
+
+        rover_exists = False
+
+        for ids_list in self.rover_ids_collection:
+            if (custom_rover.swarm_identifier, custom_rover.rover_identifier) in ids_list:
+                rover_exists = True
+
+        if not rover_exists:
+            self.rover_ids_collection.append((custom_rover.swarm_identifier, custom_rover.rover_identifier))
+        else:
+            print('Rover already added')
+
+    def remove_rover(self, custom_rover):
+
+        rover_exists = False
+
+        for ids_list in self.rover_ids_collection:
+            if (custom_rover.swarm_identifier, custom_rover.rover_identifier) in ids_list:
+                rover_exists = True
+
+        if rover_exists:
+            self.rover_ids_collection.remove((custom_rover.swarm_identifier, custom_rover.rover_identifier))
+        else:
+            print('Rover not found')
+
+
+class CustomScientist(CustomUser):
+
+    def __init__(self, user_identifier):
+        super().__init__(user_identifier)
+
+    def view_rover_location(self, custom_rover):
+
+        rover_exists = False
+
+        for ids_list in self.user_ids:
+            if (custom_rover.swarm_identifier, custom_rover.rover_identifier) in ids_list:
+                custom_rover.display_location()
+                rover_exists = True
+
+        if not rover_exists:
+            print('Rover not found')
+            
+            
+            
+class RoverInterface:
+    def __init__(self, user_id, rovers):
+        self.user_id = user_id
+        self.rovers = rovers
+
+    def send_message_to_rover(self, rover_id, move_by):
+        # Validate rover_id and move_by
+        if not isinstance(rover_id, int) or not isinstance(move_by, tuple):
+            print("Invalid input. Please provide a valid rover_id (integer) and move_by (tuple).")
+            return
+
+        # Find the rover with the given rover_id
+        rover = None
+        for r in self.rovers:
+            if r.rover_id == rover_id:
+                rover = r
+                break
+
+        if rover is not None:
+            # Send the message to the rover
+            message = {'Swarm_ID': rover.swarm_id, 'Rover_ID': rover.rover_id, 'move_by': move_by}
+            rover.receive_message(message)
+            print(f"Message sent to Rover {rover.rover_id} in Swarm {rover.swarm_id}.")
+        else:
+            print(f"Rover with ID {rover_id} not found.")
+
+
+
